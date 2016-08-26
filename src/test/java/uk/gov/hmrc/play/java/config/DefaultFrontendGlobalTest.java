@@ -16,27 +16,33 @@
 
 package uk.gov.hmrc.play.java.config;
 
+import com.typesafe.config.ConfigFactory;
 import org.junit.Before;
 import org.junit.Test;
+import play.GlobalSettings;
+import play.api.Configuration;
 import play.api.mvc.EssentialFilter;
 import play.i18n.Messages;
 import play.mvc.Http;
 import play.mvc.Result;
 import play.test.Helpers;
+import uk.gov.hmrc.play.java.ScalaFixtures;
 import uk.gov.hmrc.play.java.frontend.bootstrap.DefaultFrontendGlobal;
 import uk.gov.hmrc.play.java.frontend.filters.WhitelistFilter;
 
+import java.io.File;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
 
+import static org.bouncycastle.asn1.x500.style.RFC4519Style.o;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 import static play.test.Helpers.*;
 
-public class DefaultFrontendGlobalTest extends DefaultFrontendGlobal {
+public class DefaultFrontendGlobalTest extends ScalaFixtures {
     private Http.RequestHeader rh = mock(Http.RequestHeader.class);
     private int futureTimeout = 3000;
 
@@ -53,19 +59,28 @@ public class DefaultFrontendGlobalTest extends DefaultFrontendGlobal {
 
     @Test
     public void renderInternalServerError() {
-        running(Helpers.fakeApplication(this), () -> {
+        GlobalSettings settings = new DefaultFrontendGlobal();
+        running(fakeApplication(settings), () -> {
             Exception exception = new Exception("Runtime exception");
-            Result result = onError(rh, exception).get(futureTimeout);
+            Result result = settings.onError(rh, exception).get(futureTimeout);
             assertThat(status(result), is(INTERNAL_SERVER_ERROR));
             assertThat(contentAsString(result), containsString("Sorry, we’re experiencing technical difficulties"));
             assertThat(contentAsString(result), containsString("Please try again in a few minutes"));
         });
     }
 
+    protected Map<String, Object> additionalProperties() {
+        Map<String, Object> props = super.additionalProperties();
+        props.putAll(ConfigFactory.parseFileAnySyntax(new File("src/main/resources/common.conf")).resolve().root().unwrapped());
+        props.put("Test.auditing.enabled", false);
+       return props;
+    }
+
     @Test
     public void renderPageNotFound() {
-        running(Helpers.fakeApplication(this), () -> {
-            Result result = onHandlerNotFound(rh).get(futureTimeout);
+        GlobalSettings settings = new DefaultFrontendGlobal();
+        running(fakeApplication(settings), () -> {
+            Result result = settings.onHandlerNotFound(rh).get(futureTimeout);
             assertThat(status(result), is(NOT_FOUND));
             assertThat(contentAsString(result), containsString("This page can’t be found"));
             assertThat(contentAsString(result), containsString("Please check that you have entered the correct web address"));
@@ -74,8 +89,9 @@ public class DefaultFrontendGlobalTest extends DefaultFrontendGlobal {
 
     @Test
     public void renderBadRequest() {
-        running(Helpers.fakeApplication(this), () -> {
-            Result result = onBadRequest(rh, "").get(futureTimeout);
+        GlobalSettings settings = new DefaultFrontendGlobal();
+        running(fakeApplication(settings), () -> {
+            Result result = settings.onBadRequest(rh, "").get(futureTimeout);
             assertThat(status(result), is(BAD_REQUEST));
             assertThat(contentAsString(result), containsString("Bad request"));
             assertThat(contentAsString(result), containsString("Please check that you have entered the correct web address"));
@@ -91,7 +107,7 @@ public class DefaultFrontendGlobalTest extends DefaultFrontendGlobal {
             }
         };
 
-        running(testServer(3333, Helpers.fakeApplication(minusWhitelist)), HTMLUNIT, browser -> {
+        running(testServer(3333, fakeApplication(minusWhitelist)), HTMLUNIT, browser -> {
             browser.goTo("http://localhost:3333/notFound").pageSource();
             assertThat(browser.pageSource(), containsString(Messages.get("global.error.pageNotFound404.title")));
         });

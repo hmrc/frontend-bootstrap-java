@@ -58,7 +58,7 @@ public class FrontendAuditFilter implements uk.gov.hmrc.play.audit.filters.Front
     public FrontendAuditFilter() {
         maskedFormFields = getConfStringList("filter.audit.maskedFormFields", Collections.singletonList("password"));
         applicationPort = getConfInteger("filter.audit.applicationPort", null);
-        auditConnector = uk.gov.hmrc.play.java.connectors.AuditConnector.instance();
+        auditConnector = auditConnector();
     }
 
     @Override

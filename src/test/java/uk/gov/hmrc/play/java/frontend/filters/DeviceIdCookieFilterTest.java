@@ -57,13 +57,14 @@ public class DeviceIdCookieFilterTest extends ScalaFixtures {
         return deviceIdCookie(secret, previousSecretValues).buildNewDeviceIdCookie();
     }
 
-    private Map<String, Object> additionalConfig() {
-        Map<String, Object> map = additionalConfigWithNoPreviousKey();
+    @Override
+    protected Map<String, Object> additionalProperties() {
+        Map<String, Object> map = additionalPropertiesWithNoPreviousKey();
         map.put("cookie.deviceId.previous.secret", previousSecretValues);
         return map;
     }
 
-    private Map<String, Object> additionalConfigWithNoPreviousKey() {
+    private Map<String, Object> additionalPropertiesWithNoPreviousKey() {
         Map<String, Object> map = new HashMap<>();
         map.put("cookie.deviceId.secret", theSecret);
         map.put("Test.auditing.enabled", false);
@@ -72,7 +73,7 @@ public class DeviceIdCookieFilterTest extends ScalaFixtures {
 
     @Test
     public void createTheDeviceIdWhenNoCookieExists() {
-        running(fakeApplication(new GlobalSettings(), additionalConfig()), () -> {
+        running(fakeApplication(new GlobalSettings()), () -> {
             FakeRequest incomingRequest = FakeRequest.apply();
             Action action = generateActionWithOkResponse();
 
@@ -85,7 +86,7 @@ public class DeviceIdCookieFilterTest extends ScalaFixtures {
 
     @Test
     public void createTheDeviceIdWhenNoCookieExistsAndNoPreviousKeys() {
-        running(fakeApplication(new GlobalSettings(), additionalConfigWithNoPreviousKey()), () -> {
+        running(fakeApplication(new GlobalSettings(), additionalPropertiesWithNoPreviousKey()), () -> {
             FakeRequest incomingRequest = FakeRequest.apply();
             Action action = generateActionWithOkResponse();
 
@@ -98,7 +99,7 @@ public class DeviceIdCookieFilterTest extends ScalaFixtures {
 
     @Test
     public void doNothingWhenAValidCookieExists() {
-        running(fakeApplication(new GlobalSettings(), additionalConfig()), () -> {
+        running(fakeApplication(new GlobalSettings()), () -> {
             Cookie cookie = createCookie(theSecret, previousSecretValues);
             FakeRequest incomingRequest = FakeRequest.apply().withCookies(JavaConversions.asScalaBuffer(Collections.singletonList(cookie)));
             Action action = generateActionWithOkResponse();
@@ -112,7 +113,7 @@ public class DeviceIdCookieFilterTest extends ScalaFixtures {
 
     @Test
     public void successfullyDecodeADeviceIdFromAPreviousSecret() {
-        running(fakeApplication(new GlobalSettings(), additionalConfig()), () -> {
+        running(fakeApplication(new GlobalSettings()), () -> {
             DeviceIdCookie cookie = deviceIdCookie(theSecret, previousSecretValues);
             String uuid = cookie.generateUUID();
             Long timestamp = cookie.getTimeStamp();

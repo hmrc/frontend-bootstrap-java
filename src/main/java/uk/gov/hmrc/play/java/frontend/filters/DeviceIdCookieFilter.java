@@ -33,7 +33,7 @@ public class DeviceIdCookieFilter extends uk.gov.hmrc.play.java.filters.frontend
     private static final String MESSAGE = "Missing required configuration entry for deviceIdFilter : %s";
 
     public DeviceIdCookieFilter() {
-        super(ServicesConfig.appName(), currentSecret(), AuditConnector.instance(), buildListOfPreviousSecrets());
+        super(ServicesConfig.appName(), currentSecret(), ServicesConfig.auditConnector(), buildListOfPreviousSecrets());
     }
 
     private static String currentSecret() {

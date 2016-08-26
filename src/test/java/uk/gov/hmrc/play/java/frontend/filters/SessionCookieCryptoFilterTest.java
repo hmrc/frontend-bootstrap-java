@@ -43,40 +43,20 @@ import static sun.security.krb5.internal.crypto.Nonce.value;
 
 public class SessionCookieCryptoFilterTest extends ScalaFixtures {
 
-/*
-  val appConfig = Map("cookie.encryption.key" -> "MTIzNDU2Nzg5MDEyMzQ1Cg==")
-
-  val action = {
-    val mockAction = mock[(RequestHeader) => Future[Result]]
-    val outgoingResponse = Future.successful(Results.Ok.withHeaders(HeaderNames.SET_COOKIE -> Cookies.encode(Seq(Cookie(Session.COOKIE_NAME, "our new cookie")))))
-    when(mockAction.apply(any())).thenReturn(outgoingResponse)
-    mockAction
-  }
-
-  def requestPassedToAction: RequestHeader = {
-    val updatedRequest = ArgumentCaptor.forClass(classOf[RequestHeader])
-    verify(action).apply(updatedRequest.capture())
-    updatedRequest.getValue
-  }
-
-  "SessionCookieCryptoFilter" should {
-
-    def createEncryptedCookie(cookieVal: String) = Cookie(Session.COOKIE_NAME, ApplicationCrypto.SessionCookieCrypto.encrypt(PlainText(cookieVal)).value)
-*/
-
     private Result okWithHeaders() {
         return okResult.withHeaders(asScalaBuffer(singletonList(new Tuple2<>(SET_COOKIE, Cookies$.MODULE$.encode(asScalaBuffer(singletonList(createCookie("our new cookie", false))))))));
     }
 
-    private Map<String, Object> additionalConfig() {
+    @Override
+    protected Map<String, Object> additionalProperties() {
         Map<String, Object> map = new HashMap<>();
-        map.put("cookie.encryption.key", "MTIzNDU2Nzg5MDEyMzQ1Cg==");
+        map.put("cookie.encryption.key", "gvBoGdgzqG1AarzF1LY0zQ==");
         return map;
     }
 
     @Test
     public void decryptTheSessionCookieOnTheWayInAndEncryptItAgainOnTheWayBack() {
-        running(fakeApplication(new GlobalSettings(), additionalConfig()), () -> {
+        running(fakeApplication(new GlobalSettings()), () -> {
             Cookie encryptedIncomingCookie = createEncryptedCookie("our cookie");
             Cookie unencryptedIncomingCookie = createUnencryptedCookie("our cookie");
             Action action = generateAction(okWithHeaders());

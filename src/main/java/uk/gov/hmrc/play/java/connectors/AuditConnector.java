@@ -42,16 +42,10 @@ public class AuditConnector implements uk.gov.hmrc.play.audit.http.connector.Aud
     private Logger$ logger;
     private Logger connectionLogger;
 
-    private static final AuditConnector INSTANCE = new AuditConnector();
-
-    private AuditConnector() {
+    public AuditConnector() {
         auditingConfig = LoadAuditingConfig$.MODULE$.apply(String.format("%s.auditing", ServicesConfig.env()));
         connectionLogger = Logger.apply("connector");
         logger = Logger$.MODULE$;
-    }
-
-    public static final AuditConnector instance() {
-        return INSTANCE;
     }
 
     @Override

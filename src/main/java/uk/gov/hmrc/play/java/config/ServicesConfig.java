@@ -18,20 +18,21 @@ package uk.gov.hmrc.play.java.config;
 
 import play.Configuration;
 import uk.gov.hmrc.play.config.RunMode$;
+import uk.gov.hmrc.play.java.connectors.AuditConnector;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
 public class ServicesConfig {
-    private static Configuration configuration = Configuration.root();
-
     private static final String rootServices = "microservice.services";
     private static final String envServices = String.format("%s.%s", env(), rootServices);
     private static final String govUkEnvServices = String.format("govuk-tax.%s.services", env());
 
+    private static AuditConnector auditConnector;
+
     protected String loadConfig(String key) throws Exception {
-        return Optional.ofNullable(configuration.getString(key)).orElseThrow(() -> new Exception(String.format("Missing configuration key: %s", key)));
+        return Optional.ofNullable(Configuration.root().getString(key)).orElseThrow(() -> new Exception(String.format("Missing configuration key: %s", key)));
     }
 
     public String defaultProtocol() {
@@ -58,6 +59,14 @@ public class ServicesConfig {
         return getConfString("appName", "APP NAME NOT SET");
     }
 
+    public static AuditConnector auditConnector() {
+        if(auditConnector == null) {
+            auditConnector = new AuditConnector();
+        }
+
+        return auditConnector;
+    }
+
     public static Configuration getConfConf(String name, Configuration defaultVal) {
         return call(Configuration::getConfig, name, defaultVal);
     }
@@ -79,8 +88,9 @@ public class ServicesConfig {
     }
 
     private static <T> T call(ConfigFunc<T> func, String basePath, T defaultValue) {
+        Configuration conf = Configuration.root();
         return Stream.of(envServices, govUkEnvServices, env(), rootServices, null)
-                .map((v) -> Optional.ofNullable(func.get(configuration, v == null ? basePath : String.format("%s.%s", v, basePath))))
+                .map((v) -> Optional.ofNullable(func.get(conf, v == null ? basePath : String.format("%s.%s", v, basePath))))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .findFirst()

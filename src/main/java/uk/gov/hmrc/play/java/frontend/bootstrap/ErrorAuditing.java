@@ -67,7 +67,7 @@ public class ErrorAuditing extends JavaGlobalSettings implements ErrorAuditingSe
 
     @Override
     public uk.gov.hmrc.play.audit.http.connector.AuditConnector auditConnector() {
-        return AuditConnector.instance();
+        return ServicesConfig.auditConnector();
     }
 
     // Scala compatibility required methods

@@ -25,7 +25,7 @@ val compileDependencies = Seq(
   javaCore,
   "com.typesafe.play" %% "play" % PlayVersion.current,
   "uk.gov.hmrc" %% "crypto" % "3.1.0",
-  "uk.gov.hmrc" %% "play-filters-java" % "0.1.0-10-g664bc6a",
+  "uk.gov.hmrc" %% "play-filters-java" % "0.3.0",
   "uk.gov.hmrc" %% "play-whitelist-filter" % "1.1.0",
   "uk.gov.hmrc" %% "frontend-bootstrap" % "6.5.0",
   "uk.gov.hmrc" %% "play-graphite" % "2.0.0",
@@ -34,8 +34,8 @@ val compileDependencies = Seq(
 )
 
 val testDependencies = Seq(
+  javaWs,
   "uk.gov.hmrc" %% "hmrctest" % "1.7.0",
-  "uk.gov.hmrc" %% "play-filters-java" % "0.1.0-10-g664bc6a" classifier "tests",
   "org.pegdown" % "pegdown" % "1.6.0",
   "com.novocode" % "junit-interface" % "0.10",
   "com.typesafe.play" %% "play-test" % PlayVersion.current
