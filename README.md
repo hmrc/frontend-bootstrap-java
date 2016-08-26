@@ -1,7 +1,7 @@
-frontend-bootstrap
-==================
+frontend-bootstrap-java
+=======================
 
-[![Build Status](https://travis-ci.org/hmrc/frontend-bootstrap.svg)](https://travis-ci.org/hmrc/frontend-bootstrap) [ ![Download](https://api.bintray.com/packages/hmrc/releases/frontend-bootstrap/images/download.svg) ](https://bintray.com/hmrc/releases/frontend-bootstrap/_latestVersion)
+[![Build Status](https://travis-ci.org/hmrc/frontend-bootstrap-java.svg)](https://travis-ci.org/hmrc/frontend-bootstrap-java) [ ![Download](https://api.bintray.com/packages/hmrc/releases/frontend-bootstrap-java/images/download.svg) ](https://bintray.com/hmrc/releases/frontend-bootstrap-java/_latestVersion)
 
 This library implements a basic Play Global object and related functionality for frontend applications.
 
