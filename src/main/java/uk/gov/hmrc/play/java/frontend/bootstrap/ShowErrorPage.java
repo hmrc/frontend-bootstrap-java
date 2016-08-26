@@ -27,70 +27,61 @@ import scala.concurrent.ExecutionContext;
 import scala.concurrent.Future;
 import uk.gov.hmrc.play.frontend.bootstrap.ShowErrorPage$class;
 
-public class ShowErrorPage extends JavaGlobalSettings implements uk.gov.hmrc.play.frontend.bootstrap.ShowErrorPage {
+@FunctionalInterface
+public interface ShowErrorPage extends JavaGlobalSettings, uk.gov.hmrc.play.frontend.bootstrap.ShowErrorPage {
 
-    private RequestHeader getCurrentRequestHeader() {
+    default RequestHeader getCurrentRequestHeader() {
         return Http.Context.current()._requestHeader();
     }
 
-    private F.Promise<Result> wrapAndReturn(Future<play.api.mvc.Result> result) {
+    default F.Promise<Result> wrapAndReturn(Future<play.api.mvc.Result> result) {
         JFunction1<play.api.mvc.Result, Result> resultConverter = scalaResult -> (Result) () -> scalaResult;
         ExecutionContext ec = play.api.libs.concurrent.Execution.defaultContext();
         return F.Promise.wrap(result.map(resultConverter, ec));
     }
 
-    public F.Promise<Result> onBadRequest(Http.RequestHeader rh, String error) {
+    default F.Promise<Result> onBadRequest(Http.RequestHeader rh, String error) {
         Future<play.api.mvc.Result> result = onBadRequest(getCurrentRequestHeader(), error);
         return wrapAndReturn(result);
     }
 
-    public F.Promise<Result> onHandlerNotFound(Http.RequestHeader rh) {
+    default F.Promise<Result> onHandlerNotFound(Http.RequestHeader rh) {
         Future<play.api.mvc.Result> result = onHandlerNotFound(getCurrentRequestHeader());
         return wrapAndReturn(result);
     }
 
-    public F.Promise<Result> onError(Http.RequestHeader rh, Throwable t) {
+    default F.Promise<Result> onError(Http.RequestHeader rh, Throwable t) {
         Future<play.api.mvc.Result> result = onError(getCurrentRequestHeader(), t);
         return wrapAndReturn(result);
     }
 
-    @Override
-    public Html standardErrorTemplate(String pageTitle, String heading, String message, Request<?> request) {
-        return views.html.global_error.render(pageTitle, heading, message);
-    }
+    Html standardErrorTemplate(String pageTitle, String heading, String message, Request<?> request);
 
-    @Override
-    public Html badRequestTemplate(Request<?> request) {
+    default Html badRequestTemplate(Request<?> request) {
         return ShowErrorPage$class.badRequestTemplate(this, request);
     }
 
-    @Override
-    public Html notFoundTemplate(Request<?> request) {
+    default Html notFoundTemplate(Request<?> request) {
         return ShowErrorPage$class.notFoundTemplate(this, request);
     }
 
-    @Override
-    public Html internalServerErrorTemplate(Request<?> request) {
+    default Html internalServerErrorTemplate(Request<?> request) {
         return ShowErrorPage$class.internalServerErrorTemplate(this, request);
     }
 
-    @Override
-    public play.api.mvc.Result resolveError(RequestHeader rh, Throwable ex) {
+    default play.api.mvc.Result resolveError(RequestHeader rh, Throwable ex) {
         return ShowErrorPage$class.resolveError(this, rh, ex);
     }
 
-    @Override
-    public Future<play.api.mvc.Result> onError(RequestHeader request, Throwable ex) {
+    default Future<play.api.mvc.Result> onError(RequestHeader request, Throwable ex) {
         return ShowErrorPage$class.onError(this, request, ex);
     }
 
-    @Override
-    public Future<play.api.mvc.Result> onHandlerNotFound(RequestHeader request) {
+    default Future<play.api.mvc.Result> onHandlerNotFound(RequestHeader request) {
         return ShowErrorPage$class.onHandlerNotFound(this, request);
     }
 
-    @Override
-    public Future<play.api.mvc.Result> onBadRequest(RequestHeader request, String error) {
+    default Future<play.api.mvc.Result> onBadRequest(RequestHeader request, String error) {
         return ShowErrorPage$class.onBadRequest(this, request, error);
     }
 }

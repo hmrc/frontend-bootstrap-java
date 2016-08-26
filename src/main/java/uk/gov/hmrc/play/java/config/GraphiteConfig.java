@@ -22,7 +22,7 @@ import scala.Option;
 import uk.gov.hmrc.play.graphite.GraphiteConfig$class;
 import uk.gov.hmrc.play.java.frontend.bootstrap.JavaGlobalSettings;
 
-public class GraphiteConfig extends JavaGlobalSettings implements uk.gov.hmrc.play.graphite.GraphiteConfig {
+public class GraphiteConfig implements uk.gov.hmrc.play.graphite.GraphiteConfig, JavaGlobalSettings {
     private final String confBase;
 
     public GraphiteConfig(String confBase) {
@@ -46,11 +46,11 @@ public class GraphiteConfig extends JavaGlobalSettings implements uk.gov.hmrc.pl
 
     // Because trait implementation calls super.onStart()
     public void uk$gov$hmrc$play$graphite$GraphiteConfig$$super$onStart(Application app) {
-        super.onStart(app);
+        JavaGlobalSettings.super.onStart(app);
     }
 
     // Because trait implementation calls super.onStop()
     public void uk$gov$hmrc$play$graphite$GraphiteConfig$$super$onStop(Application app) {
-        super.onStop(app);
+        JavaGlobalSettings.super.onStop(app);
     }
 }

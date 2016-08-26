@@ -42,7 +42,7 @@ import uk.gov.hmrc.play.java.config.ServicesConfig;
 
 import static uk.gov.hmrc.play.java.config.ServicesConfig.getConfBool;
 
-public class DefaultFrontendGlobal extends GlobalSettings {
+public abstract class DefaultFrontendGlobal extends GlobalSettings {
     private Class[] frontendFilters = new Class[]{
             JavaMetricsFilter.class,
             HeadersFilter.class,
@@ -58,9 +58,7 @@ public class DefaultFrontendGlobal extends GlobalSettings {
     };
 
     private GraphiteConfig graphiteConfig = null;
-    private ShowErrorPage showErrorPage = null;
     private ErrorAuditing errorAuditing = null;
-    private String blockedPaths = null;
 
     private final Class[] securityFilters = new Class[]{SecurityHeadersFilter.class};
 
@@ -68,15 +66,16 @@ public class DefaultFrontendGlobal extends GlobalSettings {
         return getConfBool("security.headers.filter.enabled", true);
     }
 
+    protected abstract ShowErrorPage showErrorPage();
+
     @Override
     public void onStart(Application app) {
         Logger.info("Starting frontend : {} : in mode {}", ServicesConfig.appName(), app.getWrappedApplication().mode());
         ApplicationCrypto.verifyConfiguration();
         graphiteConfig = new GraphiteConfig("microservice.metrics");
-        showErrorPage = new ShowErrorPage();
         errorAuditing = new ErrorAuditing();
         graphiteConfig.onStart(app);
-        RoutingFilter.init(rh -> showErrorPage.onHandlerNotFound(rh), ServicesConfig.getConfString("routing.blocked.paths", null));
+        RoutingFilter.init(rh -> showErrorPage().onHandlerNotFound(rh), ServicesConfig.getConfString("routing.blocked.paths", null));
         super.onStart(app);
     }
 
@@ -91,19 +90,19 @@ public class DefaultFrontendGlobal extends GlobalSettings {
     @Override
     public F.Promise<Result> onBadRequest(RequestHeader rh, String error) {
         errorAuditing.onBadRequest(rh, error);
-        return showErrorPage.onBadRequest(rh, error);
+        return showErrorPage().onBadRequest(rh, error);
     }
 
     @Override
     public F.Promise<Result> onHandlerNotFound(RequestHeader rh) {
         errorAuditing.onHandlerNotFound(rh);
-        return showErrorPage.onHandlerNotFound(rh);
+        return showErrorPage().onHandlerNotFound(rh);
     }
 
     @Override
     public F.Promise<Result> onError(RequestHeader rh, Throwable t) {
         errorAuditing.onError(rh, t);
-        return showErrorPage.onError(rh, t);
+        return showErrorPage().onError(rh, t);
     }
 
     @SuppressWarnings("unchecked")

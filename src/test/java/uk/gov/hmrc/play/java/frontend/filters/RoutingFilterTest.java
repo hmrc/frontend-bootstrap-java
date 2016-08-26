@@ -17,8 +17,10 @@
 package uk.gov.hmrc.play.java.frontend.filters;
 
 import org.junit.Test;
+import play.api.mvc.Request;
 import play.api.mvc.Result;
 import play.api.test.FakeRequest;
+import play.twirl.api.Html;
 import uk.gov.hmrc.play.java.ScalaFixtures;
 import uk.gov.hmrc.play.java.frontend.bootstrap.ShowErrorPage;
 
@@ -26,10 +28,14 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 
 public class RoutingFilterTest extends ScalaFixtures {
+    private ShowErrorPage showErrorPage() {
+        return (pageTitle, heading, message, request) -> views.html.global_error.render(pageTitle, heading, message);
+    }
+
     @Test
     public void blockUrlsMatchingTheGivenRegex() {
         FakeRequest request = FakeRequest.apply("GET", "/blocked/path");
-        RoutingFilter.init(rh -> new ShowErrorPage().onHandlerNotFound(rh), "/blocked/.*");
+        RoutingFilter.init(rh -> showErrorPage().onHandlerNotFound(rh), "/blocked/.*");
         Result result = await(new RoutingFilter().apply(generateActionWithOkResponse()).apply(request));
         assertThat(result.header().status(), is(404));
     }
@@ -37,7 +43,7 @@ public class RoutingFilterTest extends ScalaFixtures {
     @Test
     public void allowUrlsNOTMatchingTheGivenRegex() {
         FakeRequest request = FakeRequest.apply("GET", "/unblocked/path");
-        RoutingFilter.init(rh -> new ShowErrorPage().onHandlerNotFound(rh), "/blocked/.*");
+        RoutingFilter.init(rh -> showErrorPage().onHandlerNotFound(rh), "/blocked/.*");
         Result result = await(new RoutingFilter().apply(generateActionWithOkResponse()).apply(request));
         assertThat(result.header().status(), is(200));
     }
@@ -45,7 +51,7 @@ public class RoutingFilterTest extends ScalaFixtures {
     @Test
     public void allowUrlsIfNoRegex() {
         FakeRequest request = FakeRequest.apply("GET", "/blocked/path");
-        RoutingFilter.init(rh -> new ShowErrorPage().onHandlerNotFound(rh), null);
+        RoutingFilter.init(rh -> showErrorPage().onHandlerNotFound(rh), null);
         Result result = await(new RoutingFilter().apply(generateActionWithOkResponse()).apply(request));
         assertThat(result.header().status(), is(200));
 

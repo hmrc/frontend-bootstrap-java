@@ -32,82 +32,68 @@ import scala.concurrent.Future;
 
 import java.io.File;
 
-public class JavaGlobalSettings implements GlobalSettings {
-    public void onStart(play.Application app) {
+public interface JavaGlobalSettings extends GlobalSettings {
+    default void onStart(play.Application app) {
         onStart(app.getWrappedApplication());
     }
 
-    public void onStop(play.Application app) {
+    default void onStop(play.Application app) {
         onStop(app.getWrappedApplication());
     }
 
-    @Override
-    public void beforeStart(Application app) {
+    default void beforeStart(Application app) {
         GlobalSettings$class.beforeStart(this, app);
     }
 
-    @Override
-    public void onStart(Application app) {
+    default void onStart(Application app) {
         GlobalSettings$class.onStart(this, app);
     }
 
-    @Override
-    public void onStop(Application app) {
+    default void onStop(Application app) {
         GlobalSettings$class.onStop(this, app);
     }
 
-    @Override
-    public Configuration configuration() {
+    default Configuration configuration() {
         return GlobalSettings$class.configuration(this);
     }
 
-    @Override
-    public Configuration onLoadConfig(Configuration config, File path, ClassLoader classloader, Enumeration.Value mode) {
+    default Configuration onLoadConfig(Configuration config, File path, ClassLoader classloader, Enumeration.Value mode) {
         return GlobalSettings$class.onLoadConfig(this, config, path, classloader, mode);
     }
 
-    @Override
-    public Tuple2<RequestHeader, Handler> onRequestReceived(RequestHeader request) {
+    default Tuple2<RequestHeader, Handler> onRequestReceived(RequestHeader request) {
         return GlobalSettings$class.onRequestReceived(this, request);
     }
 
-    @Override
-    public Function1<RequestHeader, Handler> doFilter(Function1<RequestHeader, Handler> next) {
+    default Function1<RequestHeader, Handler> doFilter(Function1<RequestHeader, Handler> next) {
         return GlobalSettings$class.doFilter(this, next);
     }
 
-    @Override
-    public EssentialAction doFilter(EssentialAction next) {
+    default EssentialAction doFilter(EssentialAction next) {
         return GlobalSettings$class.doFilter(this, next);
     }
 
-    @Override
-    public Option<Handler> onRouteRequest(RequestHeader request) {
+    default Option<Handler> onRouteRequest(RequestHeader request) {
         return GlobalSettings$class.onRouteRequest(this, request);
     }
 
-    @Override
-    public Future<Result> onError(RequestHeader request, Throwable ex) {
+    default Future<Result> onError(RequestHeader request, Throwable ex) {
         return GlobalSettings$class.onError(this, request, ex);
     }
 
-    @Override
-    public Future<Result> onHandlerNotFound(RequestHeader request) {
+    default Future<Result> onHandlerNotFound(RequestHeader request) {
         return GlobalSettings$class.onHandlerNotFound(this, request);
     }
 
-    @Override
-    public Future<Result> onBadRequest(RequestHeader request, String error) {
+    default Future<Result> onBadRequest(RequestHeader request, String error) {
         return GlobalSettings$class.onBadRequest(this, request, error);
     }
 
-    @Override
-    public void onRequestCompletion(RequestHeader request) {
+    default void onRequestCompletion(RequestHeader request) {
         GlobalSettings$class.onRequestCompletion(this, request);
     }
 
-    @Override
-    public <A> A getControllerInstance(Class<A> controllerClass) {
+    default <A> A getControllerInstance(Class<A> controllerClass) {
         return (A) GlobalSettings$class.getControllerInstance(this, controllerClass);
     }
 }

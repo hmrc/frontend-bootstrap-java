@@ -20,14 +20,15 @@ import com.typesafe.config.ConfigFactory;
 import org.junit.Before;
 import org.junit.Test;
 import play.GlobalSettings;
-import play.api.Configuration;
 import play.api.mvc.EssentialFilter;
+import play.api.mvc.Request;
 import play.i18n.Messages;
 import play.mvc.Http;
 import play.mvc.Result;
-import play.test.Helpers;
+import play.twirl.api.Html;
 import uk.gov.hmrc.play.java.ScalaFixtures;
 import uk.gov.hmrc.play.java.frontend.bootstrap.DefaultFrontendGlobal;
+import uk.gov.hmrc.play.java.frontend.bootstrap.ShowErrorPage;
 import uk.gov.hmrc.play.java.frontend.filters.WhitelistFilter;
 
 import java.io.File;
@@ -35,7 +36,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
 
-import static org.bouncycastle.asn1.x500.style.RFC4519Style.o;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
@@ -45,6 +45,15 @@ import static play.test.Helpers.*;
 public class DefaultFrontendGlobalTest extends ScalaFixtures {
     private Http.RequestHeader rh = mock(Http.RequestHeader.class);
     private int futureTimeout = 3000;
+
+    private class DefaultFrontendGlobalWithShowError extends DefaultFrontendGlobal {
+        private ShowErrorPage errorPage = (pageTitle, heading, message, request) -> views.html.global_error.render(pageTitle, heading, message);
+
+        @Override
+        protected ShowErrorPage showErrorPage() {
+            return errorPage;
+        }
+    }
 
     @Before
     public void setUp() {
@@ -59,7 +68,7 @@ public class DefaultFrontendGlobalTest extends ScalaFixtures {
 
     @Test
     public void renderInternalServerError() {
-        GlobalSettings settings = new DefaultFrontendGlobal();
+        GlobalSettings settings = new DefaultFrontendGlobalWithShowError();
         running(fakeApplication(settings), () -> {
             Exception exception = new Exception("Runtime exception");
             Result result = settings.onError(rh, exception).get(futureTimeout);
@@ -78,7 +87,7 @@ public class DefaultFrontendGlobalTest extends ScalaFixtures {
 
     @Test
     public void renderPageNotFound() {
-        GlobalSettings settings = new DefaultFrontendGlobal();
+        GlobalSettings settings = new DefaultFrontendGlobalWithShowError();
         running(fakeApplication(settings), () -> {
             Result result = settings.onHandlerNotFound(rh).get(futureTimeout);
             assertThat(status(result), is(NOT_FOUND));
@@ -89,7 +98,7 @@ public class DefaultFrontendGlobalTest extends ScalaFixtures {
 
     @Test
     public void renderBadRequest() {
-        GlobalSettings settings = new DefaultFrontendGlobal();
+        GlobalSettings settings = new DefaultFrontendGlobalWithShowError();
         running(fakeApplication(settings), () -> {
             Result result = settings.onBadRequest(rh, "").get(futureTimeout);
             assertThat(status(result), is(BAD_REQUEST));
@@ -100,7 +109,7 @@ public class DefaultFrontendGlobalTest extends ScalaFixtures {
 
     @Test
     public void renderNotFoundWithServer() {
-        DefaultFrontendGlobal minusWhitelist = new DefaultFrontendGlobal() {
+        DefaultFrontendGlobal minusWhitelist = new DefaultFrontendGlobalWithShowError() {
             @Override
             public <T extends EssentialFilter> Class<T>[] filters() {
                 return (Class[]) Arrays.stream(super.filters()).filter(f -> !f.isAssignableFrom(WhitelistFilter.class)).toArray(size -> new Class[size]);

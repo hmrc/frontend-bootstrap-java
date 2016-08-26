@@ -17,7 +17,9 @@
 package uk.gov.hmrc.play.java.frontend.bootstrap;
 
 import play.api.mvc.RequestHeader;
+import play.api.mvc.Result;
 import play.mvc.Http;
+import scala.concurrent.Future;
 import uk.gov.hmrc.play.audit.http.HttpAuditEvent$class;
 import uk.gov.hmrc.play.audit.http.config.ErrorAuditingSettings;
 import uk.gov.hmrc.play.audit.model.DataEvent;
@@ -25,7 +27,7 @@ import uk.gov.hmrc.play.http.HeaderCarrier;
 import uk.gov.hmrc.play.java.config.ServicesConfig;
 import uk.gov.hmrc.play.java.connectors.AuditConnector;
 
-public class ErrorAuditing extends JavaGlobalSettings implements ErrorAuditingSettings {
+public class ErrorAuditing implements ErrorAuditingSettings, JavaGlobalSettings {
     private String unexpectedError = "Unexpected error";
     private String notFoundError = "Resource Endpoint Not Found";
     private String badRequestError = "Request bad format exception";
@@ -35,15 +37,30 @@ public class ErrorAuditing extends JavaGlobalSettings implements ErrorAuditingSe
     }
 
     public void onError(Http.RequestHeader rh, Throwable ex) {
-        onError(getCurrentRequestHeader(), ex);
+        JavaGlobalSettings.super.onError(getCurrentRequestHeader(), ex);
     }
 
     public void onHandlerNotFound(Http.RequestHeader rh) {
-        onHandlerNotFound(getCurrentRequestHeader());
+        JavaGlobalSettings.super.onHandlerNotFound(getCurrentRequestHeader());
     }
 
     public void onBadRequest(Http.RequestHeader rh, String error) {
-        onBadRequest(getCurrentRequestHeader(), error);
+        JavaGlobalSettings.super.onBadRequest(getCurrentRequestHeader(), error);
+    }
+
+    @Override
+    public Future<Result> onError(RequestHeader request, Throwable ex) {
+        return JavaGlobalSettings.super.onError(request, ex);
+    }
+
+    @Override
+    public Future<Result> onHandlerNotFound(RequestHeader request) {
+        return JavaGlobalSettings.super.onHandlerNotFound(request);
+    }
+
+    @Override
+    public Future<Result> onBadRequest(RequestHeader request, String error) {
+        return JavaGlobalSettings.super.onBadRequest(request, error);
     }
 
     @Override

@@ -20,15 +20,12 @@ import org.junit.Test;
 import play.GlobalSettings;
 import play.api.mvc.*;
 import play.api.test.FakeRequest;
-import play.mvc.Http;
 import scala.Tuple2;
-import scala.collection.JavaConversions;
 import uk.gov.hmrc.crypto.ApplicationCrypto;
 import uk.gov.hmrc.crypto.Crypted;
 import uk.gov.hmrc.crypto.PlainText;
 import uk.gov.hmrc.play.java.ScalaFixtures;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -39,7 +36,6 @@ import static play.api.mvc.Cookie.*;
 import static play.mvc.Http.HeaderNames.SET_COOKIE;
 import static play.test.Helpers.running;
 import static scala.collection.JavaConversions.asScalaBuffer;
-import static sun.security.krb5.internal.crypto.Nonce.value;
 
 public class SessionCookieCryptoFilterTest extends ScalaFixtures {
 
