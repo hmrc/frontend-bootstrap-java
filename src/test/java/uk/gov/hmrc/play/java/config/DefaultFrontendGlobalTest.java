@@ -26,8 +26,11 @@ import play.i18n.Messages;
 import play.mvc.Http;
 import play.mvc.Result;
 import play.twirl.api.Html;
+import uk.gov.hmrc.play.audit.http.config.ErrorAuditingSettings;
 import uk.gov.hmrc.play.java.ScalaFixtures;
+import uk.gov.hmrc.play.java.connectors.AuditConnector;
 import uk.gov.hmrc.play.java.frontend.bootstrap.DefaultFrontendGlobal;
+import uk.gov.hmrc.play.java.frontend.bootstrap.ErrorAuditing;
 import uk.gov.hmrc.play.java.frontend.bootstrap.ShowErrorPage;
 import uk.gov.hmrc.play.java.frontend.filters.WhitelistFilter;
 
@@ -45,9 +48,16 @@ import static play.test.Helpers.*;
 public class DefaultFrontendGlobalTest extends ScalaFixtures {
     private Http.RequestHeader rh = mock(Http.RequestHeader.class);
     private int futureTimeout = 3000;
+    private AuditConnector auditConnector = mock(AuditConnector.class);
 
     private class DefaultFrontendGlobalWithShowError extends DefaultFrontendGlobal {
         private ShowErrorPage errorPage = (pageTitle, heading, message, request) -> views.html.global_error.render(pageTitle, heading, message);
+        private ErrorAuditing errorAuditing = () -> auditConnector;
+
+        @Override
+        protected ErrorAuditing errorAuditing() {
+            return errorAuditing;
+        }
 
         @Override
         protected ShowErrorPage showErrorPage() {

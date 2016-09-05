@@ -28,7 +28,7 @@ import play.mvc.Http.RequestHeader;
 import play.mvc.Result;
 import uk.gov.hmrc.crypto.ApplicationCrypto;
 import uk.gov.hmrc.play.java.frontend.filters.FrontendAuditFilter;
-import uk.gov.hmrc.play.java.frontend.filters.RoutingFilter;
+import uk.gov.hmrc.play.java.filters.RoutingFilter;
 import uk.gov.hmrc.play.java.frontend.filters.DeviceIdCookieFilter;
 import uk.gov.hmrc.play.java.frontend.filters.SecurityHeadersFilter;
 import uk.gov.hmrc.play.java.frontend.filters.SessionCookieCryptoFilter;
@@ -58,7 +58,6 @@ public abstract class DefaultFrontendGlobal extends GlobalSettings {
     };
 
     private GraphiteConfig graphiteConfig = null;
-    private ErrorAuditing errorAuditing = null;
 
     private final Class[] securityFilters = new Class[]{SecurityHeadersFilter.class};
 
@@ -67,13 +66,13 @@ public abstract class DefaultFrontendGlobal extends GlobalSettings {
     }
 
     protected abstract ShowErrorPage showErrorPage();
+    protected abstract ErrorAuditing errorAuditing();
 
     @Override
     public void onStart(Application app) {
         Logger.info("Starting frontend : {} : in mode {}", ServicesConfig.appName(), app.getWrappedApplication().mode());
         ApplicationCrypto.verifyConfiguration();
         graphiteConfig = new GraphiteConfig("microservice.metrics");
-        errorAuditing = new ErrorAuditing();
         graphiteConfig.onStart(app);
         RoutingFilter.init(rh -> showErrorPage().onHandlerNotFound(rh), ServicesConfig.getConfString("routing.blocked.paths", null));
         super.onStart(app);
@@ -89,19 +88,19 @@ public abstract class DefaultFrontendGlobal extends GlobalSettings {
 
     @Override
     public F.Promise<Result> onBadRequest(RequestHeader rh, String error) {
-        errorAuditing.onBadRequest(rh, error);
+        errorAuditing().onBadRequest(rh, error);
         return showErrorPage().onBadRequest(rh, error);
     }
 
     @Override
     public F.Promise<Result> onHandlerNotFound(RequestHeader rh) {
-        errorAuditing.onHandlerNotFound(rh);
+        errorAuditing().onHandlerNotFound(rh);
         return showErrorPage().onHandlerNotFound(rh);
     }
 
     @Override
     public F.Promise<Result> onError(RequestHeader rh, Throwable t) {
-        errorAuditing.onError(rh, t);
+        errorAuditing().onError(rh, t);
         return showErrorPage().onError(rh, t);
     }
 

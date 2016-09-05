@@ -25,7 +25,7 @@ val compileDependencies = Seq(
   javaCore,
   "com.typesafe.play" %% "play" % PlayVersion.current,
   "uk.gov.hmrc" %% "crypto" % "3.1.0",
-  "uk.gov.hmrc" %% "play-filters-java" % "0.3.0",
+  "uk.gov.hmrc" %% "play-filters-java" % "0.5.0",
   "uk.gov.hmrc" %% "play-whitelist-filter" % "1.1.0",
   "uk.gov.hmrc" %% "frontend-bootstrap" % "6.5.0",
   "uk.gov.hmrc" %% "play-graphite" % "2.0.0",
