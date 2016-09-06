@@ -16,12 +16,15 @@
 
 package uk.gov.hmrc.play.java.frontend.bootstrap;
 
+import play.api.GlobalSettings;
+import play.api.GlobalSettings$class;
 import play.api.mvc.RequestHeader;
 import play.api.mvc.Result;
 import play.mvc.Http;
 import scala.concurrent.Future;
 import uk.gov.hmrc.play.audit.http.HttpAuditEvent$class;
 import uk.gov.hmrc.play.audit.http.config.ErrorAuditingSettings;
+import uk.gov.hmrc.play.audit.http.config.ErrorAuditingSettings$class;
 import uk.gov.hmrc.play.audit.model.DataEvent;
 import uk.gov.hmrc.play.http.HeaderCarrier;
 import uk.gov.hmrc.play.java.config.ServicesConfig;
@@ -38,30 +41,30 @@ public interface ErrorAuditing extends ErrorAuditingSettings, JavaGlobalSettings
     }
 
     default void onError(Http.RequestHeader rh, Throwable ex) {
-        JavaGlobalSettings.super.onError(getCurrentRequestHeader(), ex);
+        onError(getCurrentRequestHeader(), ex);
     }
 
     default void onHandlerNotFound(Http.RequestHeader rh) {
-        JavaGlobalSettings.super.onHandlerNotFound(getCurrentRequestHeader());
+        onHandlerNotFound(getCurrentRequestHeader());
     }
 
     default void onBadRequest(Http.RequestHeader rh, String error) {
-        JavaGlobalSettings.super.onBadRequest(getCurrentRequestHeader(), error);
+        onBadRequest(getCurrentRequestHeader(), error);
     }
 
     @Override
     default Future<Result> onError(RequestHeader request, Throwable ex) {
-        return JavaGlobalSettings.super.onError(request, ex);
+        return ErrorAuditingSettings$class.onError(this, request, ex);
     }
 
     @Override
     default Future<Result> onHandlerNotFound(RequestHeader request) {
-        return JavaGlobalSettings.super.onHandlerNotFound(request);
+        return ErrorAuditingSettings$class.onHandlerNotFound(this, request);
     }
 
     @Override
     default Future<Result> onBadRequest(RequestHeader request, String error) {
-        return JavaGlobalSettings.super.onBadRequest(request, error);
+        return ErrorAuditingSettings$class.onBadRequest(this, request, error);
     }
 
     @Override
@@ -123,5 +126,20 @@ public interface ErrorAuditing extends ErrorAuditingSettings, JavaGlobalSettings
     // Scala compatibility required methods
     default void uk$gov$hmrc$play$audit$http$config$ErrorAuditingSettings$_setter_$uk$gov$hmrc$play$audit$http$config$ErrorAuditingSettings$$badRequestError_$eq(String badRequestError) {
         //this.badRequestError = badRequestError;
+    }
+
+    // Scala compatibility required methods
+    default Future<Result> uk$gov$hmrc$play$audit$http$config$ErrorAuditingSettings$$super$onHandlerNotFound(RequestHeader rh) {
+        return GlobalSettings$class.onHandlerNotFound(this, rh);
+    }
+
+    // Scala compatibility required methods
+    default Future<Result> uk$gov$hmrc$play$audit$http$config$ErrorAuditingSettings$$super$onBadRequest(RequestHeader rh, String err) {
+        return GlobalSettings$class.onBadRequest(this, rh, err);
+    }
+
+    // Scala compatibility required methods
+    default Future<Result> uk$gov$hmrc$play$audit$http$config$ErrorAuditingSettings$$super$onError(RequestHeader rh, Throwable ex) {
+        return GlobalSettings$class.onError(this, rh, ex);
     }
 }

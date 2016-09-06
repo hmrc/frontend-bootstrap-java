@@ -22,6 +22,7 @@ import org.junit.Test;
 import play.GlobalSettings;
 import play.api.mvc.EssentialFilter;
 import play.api.mvc.Request;
+import play.api.test.FakeHeaders;
 import play.i18n.Messages;
 import play.mvc.Http;
 import play.mvc.Result;
@@ -43,6 +44,7 @@ import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static play.test.Helpers.*;
 
 public class DefaultFrontendGlobalTest extends ScalaFixtures {
@@ -71,7 +73,12 @@ public class DefaultFrontendGlobalTest extends ScalaFixtures {
         Map<String, Object> argData = Collections.emptyMap();
         Long id = 2L;
         play.api.mvc.RequestHeader header = mock(play.api.mvc.RequestHeader.class);
+
+        when(header.headers()).thenReturn(new FakeHeaders(FakeHeaders.apply$default$1()));
+        when(header.method()).thenReturn("GET");
+
         Http.Request request = mock(Http.Request.class);
+
         Http.Context ctx = new Http.Context(id, header, request, flashData, flashData, argData);
         Http.Context.current.set(ctx);
     }
